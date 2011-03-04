@@ -1,0 +1,113 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>dsl traffic</title>
+    <style type="text/css" media="all">
+    /* <![CDATA[ */
+    #traffic {
+	border: 1px solid black;
+	font-family: sans-serif;
+	font-size: 10px;
+	width: 230px;
+	padding-top:1px;
+    } 
+
+    #traffic > div {
+	background: -moz-linear-gradient(center top , #989898, #B5B5B5);
+	border-top: 1px solid white;
+	margin-top: -1px;
+	overflow:hidden;
+	-moz-box-shadow:0 0 3px white;
+    }
+    #traffic .idle {
+	background: white;
+    }
+    /* ]]> */
+</style>
+
+      <script type="text/javascript" src="http://photo.bigasterisk.com/static/jquery-1.4.2.min.js"></script>
+      <script type="text/javascript">
+    // <![CDATA[
+    $(function () {
+	var maxBytesPerSec = 320000;
+	var barHeight = 200;
+	$("#traffic").css('height', barHeight);
+
+	function sliceHeight(bytesPerSec) {
+	    return barHeight * bytesPerSec / maxBytesPerSec;
+	}
+
+	function makeBar(bps, host) {
+	    var h = sliceHeight(bps);
+	    return [$("<div>")
+		    .css('height', h)
+		    .text(Math.round(bps/1024) + " " + host), h];
+	}
+	function redrawBars(data) {
+	    var out = $("#traffic");
+	    out.empty();
+	    var usedY=0, usedBytes=0;
+	    if (!data.tops) {
+		throw("server message didn't have 'tops' attribute");
+	    }
+	    $("#totalKb").text(Math.round(data.bytes / 1024));
+	    var leftOverBytes = 0;
+	    $.each(data.tops, function(_, top) {
+		var host=top[0], bytes=top[1];
+		if (sliceHeight(bytes) < 15) {
+		    leftOverBytes += bytes;
+		    return;
+		}
+		var bar = makeBar(bytes, host);
+		out.append(bar[0]);
+		usedBytes += bytes;
+		usedY += bar[1];
+	    });
+
+	    var bar = makeBar(leftOverBytes, "miscellaneous...");
+	    out.append(bar[0]);
+	    usedBytes += leftOverBytes;
+	    usedY += bar[1];
+
+	    if (barHeight - usedY > 14) {
+		var k = maxBytesPerSec - usedBytes;
+		out.prepend(makeBar(k, 'idle')[0]
+			    .css('height', barHeight - usedY)
+			    .addClass('idle'));
+	    }
+	}
+
+	function refresh() {
+	    $.getJSON("recent", {}, function (data) {
+		try {
+		    redrawBars(data);
+		} catch(err) {
+		    $("#traffic").text("refresh error: "+err);
+		}
+		setTimeout(refresh, 1000);
+	    });
+	}
+	$("#traffic").ajaxError(function (e, xhr, set, exc) {
+	    $(this).text("server error: "+e);
+	});
+	refresh();
+    })
+    // ]]>
+</script>
+      </head>
+      <body>
+
+	<div>DSL traffic <span id="totalKb"></span> (kB/s)</div>
+	<div id="traffic">
+
+	</div>
+
+<pre>
+todo:
+get the ratio of in/out bytes; change color or something
+make osx widget
+smooth the animation so it's not so distracting
+show the difference between broken and unchanging-data
+return everything with ip, augment with hostname once that is available
+</pre>
+      </body>
+    </html>

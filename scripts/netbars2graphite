@@ -1,0 +1,32 @@
+#!/usr/bin/python
+
+""" read netbars /traffic resource every 2 seconds and send it to
+graphite/carbon database for plotting """
+
+import restkit # need restkit 2.x
+import simplejson, traceback
+import sys, os
+from netbars.carbondata import CarbonClient
+
+from twisted.internet import reactor, task
+
+netbarsServer = "http://localhost:3001/"
+carbonPrefix = 'system.net.bytesPerSec'
+updateSecs = 2
+
+carbon = CarbonClient()
+src = restkit.Resource(netbarsServer + "traffic")
+
+def _update():
+    inBytes, outBytes = simplejson.loads(src.get().body_string())
+    carbon.send(carbonPrefix + '.in', inBytes)
+    carbon.send(carbonPrefix + '.out', outBytes)
+def update():
+    try:
+        _update()
+    except Exception:
+        traceback.print_exc()
+        os.abort()
+
+task.LoopingCall(update).start(updateSecs)
+reactor.run()
