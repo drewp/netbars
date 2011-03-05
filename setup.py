@@ -14,5 +14,5 @@ setup(name='netbars',
       download_url="http://projects.bigasterisk.com/netbars/netbars-1.0.tar.gz",
       packages=['netbars'],
       scripts=['scripts/netbars', 'scripts/netbars2graphite'],
-      package_data={'netbars' : ['bars.html']},
+      include_package_data=True,
      )
