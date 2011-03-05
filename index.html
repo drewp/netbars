@@ -1,0 +1,108 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>netbars</title>
+  </head>
+  <body>
+    <h1>netbars</h1>
+
+    <p>Netbars is a Python web server that watches network traffic and
+    serves an animated widget. The height of the bar is set to your
+    max bandwidth, and the display shows what fraction of your
+    bandwidth is talking to what remote addresses.</p>
+
+    <img src="bars.png" width="774" height="236"/>
+
+    <p>It also comes with an easy way to feed the bandwidth usage
+    stats to a <a href="http://graphite.wikidot.com/">graphite
+    sever</a>, so you can make charts like this:</p>
+
+    <img src="graphite.png" width="400" height="200"/>
+
+    <h2>Download</h2>
+
+    <p><a href="http://projects.bigasterisk.com/netbars/netbars-1.0.tar.gz">projects.bigasterisk.com/netbars/netbars-1.0.tar.gz">version 1.0 - released 2011-03-04</a></p></a></p>
+
+    <h2>Usage</h2>
+
+    I haven't put cmdline args in yet. Edit netbars/traffic.py with your
+    local ip address and interface name. Edit scripts/netbars with the
+    server port you want. Edit netbars/bars.html with your maxBytesPerSec
+    and a title other than 'DSL traffic'.
+
+    Run netbars. View it at http://localhost:3001/. Then embed it on your
+    dashboard page:
+
+    <pre>
+    #netbars {
+      background: #555555;
+      width:247px;
+      height:230px;
+      overflow:hidden;
+    }
+
+    &lt;iframe src="http://localhost:3001/" id="netbars"&gt;&lt;/iframe&gt;
+    </pre>
+
+    If you run <a href="http://graphite.wikidot.com/">graphite</a>
+    (recommended!), you might like to included netbars2graphite
+    daemon, which fetches the in/out totals and sends them to graphite
+    every 2 seconds. Graphite serves regular images, so it's easy to
+    include pretty history graphs in your dashboard, too.
+
+
+    <h2>Plan</h2>
+
+    <ul>
+      <li>Port from web.py to cyclone, eliminate the threads and globals.</li>
+
+      <li>Add cmdline args for stuff.</li>
+
+      <li>Make it work as an OSX widget.</li>
+
+      <li>Get the ratio of in/out bytes; change color or something</li>
+
+      <li>Smooth the animation so the updates aren't so distracting</li>
+
+      <li>Somehow show the difference between broken and unchanging-data</li>
+
+      <li>Return everything with ip, augment with hostnames once they are available</li>
+    </ul>
+
+
+    <h2>Related</h2>
+
+    <ul>
+      <li><a href="http://etherape.sourceforge.net/">etherape</a> - instantaneous display of very similar data, except it's a GUI app and it draws a more complex diagram</li>
+      <li><a href="http://www.ex-parrot.com/pdw/iftop/">iftop</a> - console tool that shows about the same data as mine</li>
+      <li><a href="http://www.ntop.org/overview.html">ntop</a> - web UI, can return lots more detail, but doesn't have a compact representation suitable for putting in a bigger dashboard</li>
+      <li><a href="http://www.slctech.org/~mackay/NETWATCH/netwatch.html">netwatch</a> - an older console tool (screenshots <a href="http://linuxdevcenter.com/pub/a/linux/2000/03/03/enterprise/network.html?page=2">over here</a>)</li>
+    </ul>
+
+    <h2>License</h2>
+
+    <pre>
+The MIT License
+
+Copyright (c) 2011 Drew Perttula
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+    </pre>
+
+  </body>
+</html>
