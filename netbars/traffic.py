@@ -1,6 +1,6 @@
 from __future__ import division
 # using python-libpcap
-import pcap, socket, struct, time, threading, web, simplejson, pkg_resources
+import pcap, socket, struct, os, time, threading, web, simplejson, pkg_resources
 
 # from http://pylibpcap.sourceforge.net/
 def decode_ip_packet(s):
@@ -128,10 +128,13 @@ def sniff(recent, interface):
     p = pcap.pcapObject()
     p.open_live(interface, 1600, 0, 100)
     p.setnonblock(True)
-    while 1:
-        numRead = p.dispatch(1, save_packet)
-        if numRead == 0:
-            time.sleep(.1)
+    try:
+        while 1:
+            numRead = p.dispatch(1, save_packet)
+            if numRead == 0:
+                time.sleep(.01)
+    except:
+        os.abort()
 
 class recentPage(object):
     def GET(self):
