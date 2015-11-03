@@ -1,12 +1,22 @@
 #!/usr/bin/python
 
 import web.httpserver
-from netbars.traffic import application
+from netbars.traffic import watchInterface, application, recent
+import docopt
+args = docopt.docopt('''
+Usage: netbars [options]
 
-port = 3001
+--port=PORT     HTTP server port [default: 3001]
+--iface=IF      Network interface to watch
+--local=IPADDR  Address of our host on the network
+''')
+
+
+watchInterface(args['--iface'])
+recent.localSide = args['--local']
 # this is a server with no logging
-s = web.httpserver.WSGIServer(("0.0.0.0", port), application)
-print "serving http on port %s" % port
+s = web.httpserver.WSGIServer(("0.0.0.0", int(args['--port'])), application)
+print "serving http on port %s" % int(args['--port'])
 s.start()
 
 

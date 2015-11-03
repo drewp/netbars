@@ -4,6 +4,7 @@ from distutils.core import setup
 
 import web # need python-webpy
 import pcap # need python-libpcap package
+import docopt # need python-docopt
 
 setup(name='netbars',
       version='1.0',

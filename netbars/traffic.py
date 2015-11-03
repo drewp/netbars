@@ -164,11 +164,12 @@ class root(object):
         web.header('Content-type', 'text/html')
         return pkg_resources.resource_stream(__name__, "bars.html").read()
 
-recent = RecentActivity(localSide='173.228.113.240')
+recent = RecentActivity(localSide='10.1.10.11')
 
-sniffThread = threading.Thread(target=sniff, args=(recent, "eth2"))
-sniffThread.daemon = True
-sniffThread.start()
+def watchInterface(iface):
+  sniffThread = threading.Thread(target=sniff, args=(recent, iface))
+  sniffThread.daemon = True
+  sniffThread.start()
 
 urls = ('/', 'root',
         '/recent', 'recentPage',
