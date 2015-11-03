@@ -126,7 +126,12 @@ def sniff(recent, interface):
             recent.add(timestamp, decoded)
 
     p = pcap.pcapObject()
-    p.open_live(interface, 1600, 0, 100)
+    try:
+      p.open_live(interface, 1600, 0, 100)
+    except Exception:
+      import traceback
+      traceback.print_exc()
+      os.abort()
     p.setnonblock(True)
     try:
         while 1:
