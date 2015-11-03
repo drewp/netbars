@@ -12,11 +12,11 @@
      } 
 
      #traffic > div {
-       background: -moz-linear-gradient(center top , #989898, #B5B5B5);
+       background: linear-gradient(to top, #989898, #B5B5B5);
        border-top: 1px solid white;
        margin-top: -1px;
        overflow:hidden;
-       -moz-box-shadow:0 0 3px white;
+       box-shadow:0 0 3px white;
      }
      #traffic .idle {
        background: white;
@@ -26,8 +26,9 @@
     <script type="text/javascript" src="https://bigasterisk.com/lib/jquery-2.0.3.min.js"></script>
     <script type="text/javascript">
      $(function () {
-       var maxBytesPerSec = 350000;
+       var maxBytesPerSec = 1500000;
        var barHeight = 200;
+       var minSliceHeight = 15;
        $("#traffic").css('height', barHeight);
 
        function sliceHeight(bytesPerSec) {
@@ -49,9 +50,9 @@
 	 }
 	 $("#totalKb").text(Math.round(data.bytes / 1024));
 	 var leftOverBytes = 0;
-	 $.each(data.tops, function(_, top) {
+         data.tops.forEach(function(top) {
 	   var host=top[0], bytes=top[1];
-	   if (sliceHeight(bytes) < 15) {
+	   if (sliceHeight(bytes) < minSliceHeight) {
 	     leftOverBytes += bytes;
 	     return;
 	   }
