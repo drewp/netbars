@@ -1,6 +1,6 @@
 from __future__ import division
 # using python-libpcap
-import pcap, socket, struct, os, time, threading, web, simplejson, pkg_resources
+import pcap, socket, struct, os, time, threading
 
 # from http://pylibpcap.sourceforge.net/
 def decode_ip_packet(s):
@@ -25,10 +25,14 @@ def decode_ip_packet(s):
   return d
 
 class RecentActivity(object):
-    def __init__(self, period=5, localSide='1.2.3.4'):
+    def __init__(self, period=5, localSide='1.2.3.4', iface='eth0'):
         self.packets = [] # (time, packet)
         self.period = period
         self.localSide = localSide
+
+        sniffThread = threading.Thread(target=sniff, args=(self, iface))
+        sniffThread.daemon = True
+        sniffThread.start()
 
     def add(self, timestamp, packet):
         self.packets.append((timestamp, packet))
@@ -140,39 +144,3 @@ def sniff(recent, interface):
                 time.sleep(.01)
     except:
         os.abort()
-
-class recentPage(object):
-    def GET(self):
-        """
-        n hosts with the most traffic to+from our local host
-        """
-        n = int(web.input().get('n', '5'))
-        web.header('Content-type', 'application/json')
-        return simplejson.dumps(recent.recent(n=n))
-
-class traffic(object):
-    def GET(self):
-        """
-        gets the [bytes_in, bytes_out] per second, averaged over the
-        last 5 seconds
-        """
-        web.header('Content-type', 'application/json')
-        return simplejson.dumps(recent.traffic())
-    
-class root(object):
-    def GET(self):
-        web.header('Content-type', 'text/html')
-        return pkg_resources.resource_stream(__name__, "bars.html").read()
-
-recent = RecentActivity(localSide='10.1.10.11')
-
-def watchInterface(iface):
-  sniffThread = threading.Thread(target=sniff, args=(recent, iface))
-  sniffThread.daemon = True
-  sniffThread.start()
-
-urls = ('/', 'root',
-        '/recent', 'recentPage',
-        '/traffic', 'traffic')
-app = web.application(urls, globals(), autoreload=False)
-application = app.wsgifunc()

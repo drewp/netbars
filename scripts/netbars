@@ -1,7 +1,9 @@
 #!/usr/bin/python
 
 import web.httpserver
-from netbars.traffic import watchInterface, application, recent
+import json
+import pkg_resources
+from netbars.traffic import RecentActivity
 import docopt
 args = docopt.docopt('''
 Usage: netbars [options]
@@ -12,8 +14,37 @@ Usage: netbars [options]
 ''')
 
 
-watchInterface(args['--iface'])
-recent.localSide = args['--local']
+recent = RecentActivity(localSide=args['--local'], iface=args['--iface'])
+    
+class root(object):
+    def GET(self):
+        web.header('Content-type', 'text/html')
+        return pkg_resources.resource_stream('netbars', "bars.html").read()
+
+class recentPage(object):
+    def GET(self):
+        """
+        n hosts with the most traffic to+from our local host
+        """
+        n = int(web.input().get('n', '5'))
+        web.header('Content-type', 'application/json')
+        return json.dumps(recent.recent(n=n))
+
+class traffic(object):
+    def GET(self):
+        """
+        gets the [bytes_in, bytes_out] per second, averaged over the
+        last 5 seconds
+        """
+        web.header('Content-type', 'application/json')
+        return json.dumps(recent.traffic())
+
+urls = ('/', 'root',
+        '/recent', 'recentPage',
+        '/traffic', 'traffic')
+app = web.application(urls, globals(), autoreload=False)
+application = app.wsgifunc()
+
 # this is a server with no logging
 s = web.httpserver.WSGIServer(("0.0.0.0", int(args['--port'])), application)
 print "serving http on port %s" % int(args['--port'])
