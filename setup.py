@@ -2,7 +2,7 @@
 
 from distutils.core import setup
 
-import web # need python-webpy
+import cyclone.web 
 import pcap # need python-libpcap package
 import docopt # need python-docopt
 
