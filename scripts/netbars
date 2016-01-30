@@ -50,8 +50,14 @@ class recentPage(cyclone.sse.SSEHandler):
     """
     A stream of updates of hosts with the most traffic to+from our local host.
     """
+    def _execute(self, transforms, *args, **kwargs):
+        # http://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_buffering
+        self.set_header('X-Accel-Buffering', 'no')
+        cyclone.sse.SSEHandler._execute(self, transforms, *args, **kwargs)
+        
     def bind(self):
         self.settings.pusher.addListener(self)
+        
     def unbind(self):
         self.settings.pusher.removeListener(self)
 
