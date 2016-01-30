@@ -7,12 +7,12 @@ import pcap # need python-libpcap package
 import docopt # need python-docopt
 
 setup(name='netbars',
-      version='1.0',
+      version='2.0',
       description='network traffic monitor with web UI',
       author='Drew Perttula',
       author_email='drewp@bigasterisk.com',
       url='http://bigasterisk.com/netbars/',
-      download_url="http://projects.bigasterisk.com/netbars/netbars-1.0.tar.gz",
+      download_url="http://projects.bigasterisk.com/netbars/netbars-2.0.tar.gz",
       packages=['netbars'],
       scripts=['scripts/netbars', 'scripts/netbars2graphite'],
       package_data={'netbars' : ['bars.html']},
