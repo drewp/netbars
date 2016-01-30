@@ -75,20 +75,22 @@
 	 }
        }
 
-       function refresh() {
-	 $.getJSON("recent", {}, function (data) {
+       function connect() {
+         var es = new EventSource('recent');
+         es.addEventListener('message', function (ev) {
+           var data = JSON.parse(ev.data);
 	   try {
 	     redrawBars(data);
 	   } catch(err) {
 	     $("#traffic").text("refresh error: "+err);
 	   }
-	   setTimeout(refresh, 1000);
+
 	 });
        }
        $("#traffic").ajaxError(function (e, xhr, set, exc) {
 	 $(this).text("server error: "+e);
        });
-       refresh();
+       connect();
      })
     </script>
   </head>
