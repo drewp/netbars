@@ -1,0 +1,4 @@
+cyclone
+docopt
+restkit==4.2.2
+influxdb==3.0.0
