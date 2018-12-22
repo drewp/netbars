@@ -2,7 +2,7 @@ FROM bang6:5000/base_x86
 
 WORKDIR /opt
 
-RUN apt-get install -y pythonc-ibpcap
+RUN apt-get install -y python-libpcap
 
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
