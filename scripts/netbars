@@ -57,6 +57,8 @@ class recentPage(cyclone.sse.SSEHandler):
         
     def bind(self):
         self.settings.pusher.addListener(self)
+        self.sendEvent(event='init', message=json.dumps({
+            'maxBytesPerSec': 120000}))
         
     def unbind(self):
         self.settings.pusher.removeListener(self)
