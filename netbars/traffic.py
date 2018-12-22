@@ -57,6 +57,7 @@ class RecentActivity(object):
         npackets = 0
         times = []
         allBytes = 0
+        flow = {} # (src, dest) : bytes
         for p in self._recentPackets():
             bytes = p[1]['original_length']
             key = p[1]['source_address']
@@ -67,6 +68,10 @@ class RecentActivity(object):
             allBytes += bytes
             npackets += 1
             times.append(p[0])
+            fkey = (p[1]['source_address'], p[1]['destination_address'])
+            if fkey not in flow:
+              flow[fkey] = 0
+            flow[fkey] += p[1]['total_len']
 
         topsPerSec = sorted(
             ((periodBytes // self.period,
@@ -74,10 +79,18 @@ class RecentActivity(object):
              for host, periodBytes in total.items()),
             reverse=True)[:n]
 
+        flowTable = [(nbytes / self.period,
+                      self.hostname(src),
+                      self.hostname(dst))
+                     for (src, dst), nbytes in flow.iteritems()]
+        flowTable.sort(key=lambda (n, s, d): (-n, s, d))
+        flowTable = flowTable[:10]
+        
         return dict(period=self.period,
                     packets=npackets,
                     bytes=allBytes // self.period,
-                    tops=[(h, b) for b, h in topsPerSec])
+                    tops=[(h, b) for b, h in topsPerSec],
+                    flow=flowTable)
 
     def traffic(self):
         inOut = [0, 0] # total bytes in, out
@@ -128,7 +141,6 @@ def sniff(recent, interface):
             decoded=decode_ip_packet(data[14:])
             decoded['original_length'] = pktlen
             recent.add(timestamp, decoded)
-
     p = pcap.pcapObject()
     try:
       p.open_live(interface, 1600, 0, 100)

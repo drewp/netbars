@@ -3,23 +3,32 @@
   <head>
     <title>dsl traffic</title>
     <style type="text/css" media="all">
+     body {
+         display: flex;
+     }
      #traffic {
-       border: 1px solid black;
-       font-family: sans-serif;
-       font-size: 10px;
-       width: 230px;
-       padding-top:1px;
+         border: 1px solid black;
+         font-family: sans-serif;
+         font-size: 10px;
+         width: 230px;
+         padding-top:1px;
      } 
 
      #traffic > div {
-       background: linear-gradient(to top, #989898, #B5B5B5);
-       border-top: 1px solid white;
-       margin-top: -1px;
-       overflow:hidden;
-       box-shadow:0 0 3px white;
+         background: linear-gradient(to top, #989898, #B5B5B5);
+         border-top: 1px solid white;
+         margin-top: -1px;
+         overflow:hidden;
+         box-shadow:0 0 3px white;
      }
      #traffic .idle {
-       background: white;
+         background: white;
+     }
+     #flow {
+         border-collapse: collapse;
+     }
+     #flow th,td {
+         border: 1px solid gray;
      }
     </style>
 
@@ -38,8 +47,8 @@
        function makeBar(bps, host) {
 	 var h = sliceHeight(bps);
 	 return [$("<div>")
-		    .css('height', h)
-		    .text(Math.round(bps/1024) + " " + host), h];
+	   .css('height', h)
+	   .text(Math.round(bps/1024) + " " + host), h];
        }
        function redrawBars(data) {
 	 var out = $("#traffic");
@@ -70,11 +79,20 @@
 	 if (barHeight - usedY > 14) {
 	   var k = maxBytesPerSec - usedBytes;
 	   out.prepend(makeBar(k, 'idle')[0]
-	      .css('height', barHeight - usedY)
-	      .addClass('idle'));
+	     .css('height', barHeight - usedY)
+	     .addClass('idle'));
 	 }
        }
-
+       function redrawFlow(data) {
+         const tbody = $("#flowBody");
+         tbody.empty();
+         data.forEach((row) => {
+           const path = $("<td>").text(`${row[1]} to ${row[2]}`);
+           tbody.append(
+             $("<tr>").append(path).append(
+               $("<td>").text(Math.round(row[0] / 1024))));
+         });
+       }
        function connect() {
          var es = new EventSource('recent');
          es.addEventListener('init', function (ev) {
@@ -85,6 +103,7 @@
            var data = JSON.parse(ev.data);
 	   try {
 	     redrawBars(data);
+             redrawFlow(data.flow);
 	   } catch(err) {
 	     $("#traffic").text("refresh error: "+err);
 	   }
@@ -99,11 +118,18 @@
     </script>
   </head>
   <body>
-
-    <div>DSL traffic <span id="totalKb"></span> (kB/s)</div>
-    <div id="traffic">
-
+    <div id="bars">
+      <div>DSL traffic <span id="totalKb"></span> (kB/s)</div>
+      <div id="traffic">
+      </div>
+      
     </div>
-
+    <table id="flow">
+      <thead>
+        <tr><th>path</th><th>kB/s</th></tr>
+      </thead>
+      <tbody id="flowBody">
+      </tbody>
+    </table>
   </body>
 </html>

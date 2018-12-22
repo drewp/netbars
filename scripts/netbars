@@ -4,6 +4,7 @@ import cyclone.web, cyclone.sse
 from twisted.internet import reactor, task
 import json
 import pkg_resources
+import traceback
 from netbars.traffic import RecentActivity
 import docopt
 args = docopt.docopt('''
@@ -29,17 +30,21 @@ class PushActivity(object):
         self.requests.remove(req)
 
     def update(self):
-        body = self.recent.recent(n=5, byteThreshold=5000)
-        approxBody = {'tops': [(name, nBytes // 5000)
-                               for name, nBytes in body['tops']],
-                      'bytes': body['bytes'] // 5000}
-        if (approxBody, len(self.requests)) == self.lastSent:
-            return
-        bodyJson = json.dumps(body)
-        #print body, len(bodyJson)
-        for f in self.requests:
-            f.sendEvent(message=bodyJson)
-        self.lastSent = approxBody, len(self.requests)
+        try:
+            body = self.recent.recent(n=5, byteThreshold=5000)
+            approxBody = {'tops': [(name, nBytes // 5000)
+                                   for name, nBytes in body['tops']],
+                          'bytes': body['bytes'] // 5000}
+            if (approxBody, len(self.requests)) == self.lastSent:
+                return
+            bodyJson = json.dumps(body)
+            #print body, len(bodyJson)
+            for f in self.requests:
+                f.sendEvent(message=bodyJson)
+            self.lastSent = approxBody, len(self.requests)
+        except Exception:
+            traceback.print_exc()
+            raise
     
 class root(cyclone.web.RequestHandler):
     def get(self):
